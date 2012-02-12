@@ -9,7 +9,9 @@ module Foreign.AppleScript
 import System.Exit
 import Foreign
 import Foreign.C
-
+import Data.Text(Text)
+import Data.Text.Encoding(encodeUtf8)
+import Data.ByteString(useAsCStringLen)
 
 type OSStatus = Int32
 data AEDesc = AEDesc
@@ -26,10 +28,10 @@ foreign import ccall "RunScript.h AppleScriptAvailable" appleScriptAvailable :: 
 -- its argument.  Any result of running the script is discarded. The
 -- @ExitCode@ indicates whether or not any errors were encountered
 -- during compilation or execution.
-execAppleScript :: String -> IO ExitCode
+execAppleScript :: Text -> IO ExitCode
 execAppleScript script = do
   let run (cstr,len) = cLowRunAppleScript cstr (fromIntegral len) nullPtr
-  osstatus <- withCStringLen script run
+  osstatus <- useAsCStringLen (encodeUtf8 script) run
   return (fromOSStatus osstatus)
 
 -- Not the world's finest functions...

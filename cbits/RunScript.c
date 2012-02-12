@@ -46,7 +46,7 @@ OSStatus LowRunAppleScript(const void* text, long textLength, AEDesc *resultData
 					typeAppleScript);
 	if (theComponent == NULL) { err = paramErr; goto bail; }
 		/* put the script text into an aedesc */
-	err = AECreateDesc(typeChar, text, textLength, &scriptTextDesc);
+	err = AECreateDesc(typeUTF8Text, text, textLength, &scriptTextDesc);
 	if (err != noErr) goto bail;
 		/* compile the script */
 	err = OSACompile(theComponent, &scriptTextDesc, 

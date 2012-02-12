@@ -18,7 +18,9 @@ Cabal-Version:          >= 1.2 && < 2
 Library {
 if os(darwin) {
   Buildable:		True
-  Build-Depends:        base >= 2 && < 5
+  Build-Depends:        base >= 2 && < 5,
+                        bytestring < 0.10,
+                        text < 0.12
   Exposed-modules:	Foreign.AppleScript
   Frameworks: 		Carbon
   Extensions: 		CPP, ForeignFunctionInterface

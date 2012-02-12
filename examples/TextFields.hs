@@ -1,8 +1,9 @@
+import Data.Text(pack)
 import Foreign.AppleScript
 
 -- Opens a small dialog window with a text field
 
-main = execAppleScript dialog
+main = execAppleScript (pack dialog)
 
 dialog = unlines $ 
          [

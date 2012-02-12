@@ -1,3 +1,4 @@
+import Data.Text(pack)
 import Foreign.AppleScript
 
 -- Asks for your name and says hello
@@ -13,7 +14,7 @@ script nm = unlines $
 main = do
   putStrLn "What is your name?"
   nm <- getLine
-  execAppleScript (script nm)
+  execAppleScript (pack $ script nm)
   
 
   
