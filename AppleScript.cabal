@@ -1,5 +1,5 @@
 Name:			AppleScript
-Version:		0.1.5
+Version:		0.2
 License:		BSD3
 License-file:		LICENSE
 Author:			Wouter Swierstra
@@ -20,7 +20,14 @@ if os(darwin) {
   Buildable:		True
   Build-Depends:        base >= 2 && < 5,
                         bytestring < 0.10,
-                        text < 0.12
+                        text < 0.12,
+                        haskell-src-meta >= 0.5.0.3 && < 0.6,
+                        text-format < 0.4,
+                        network < 2.4,
+                        conduit < 0.3,
+                        directory < 1.2,
+                        template-haskell == 2.7.*,
+                        mtl == 2.0.*
   Exposed-modules:	Foreign.AppleScript
   Frameworks: 		Carbon
   Extensions: 		CPP, ForeignFunctionInterface
