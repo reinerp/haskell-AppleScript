@@ -10,6 +10,7 @@ dialog = Text.unlines $
          [
          "tell application \"System Events\"",
          "display dialog \"Viele Grüße\"",
+         "return \"Grüße von AppleScript\""
          "end tell"
          ] 
 

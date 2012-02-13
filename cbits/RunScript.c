@@ -12,6 +12,33 @@
 
 #include <string.h>
 
+size_t _hs_AEDescSize(void) {
+  AEDesc a;
+  return sizeof(a);
+}
+
+// if the input is UTF8Text, returns its size in bytes. Otherwise returns -1
+ptrdiff_t _hs_getUTF8Size(const AEDesc* input) {
+  if (input != NULL && input->descriptorType == typeUTF8Text) {
+    return AEGetDescDataSize(input);
+  } else {
+    return -1;
+  }
+}
+
+OSErr _hs_getData(const AEDesc* input, void* dataPtr, size_t maxSize) {
+  AEGetDescData(input, dataPtr, maxSize);
+}
+
+OSErr _hs_dispose(AEDesc* input) {
+  if (input != NULL && input->descriptorType != typeNull) {
+    AEDisposeDesc(input);
+  }
+}
+
+void _hs_initNull(AEDesc * input) {
+  AECreateDesc(typeNull, NULL, 0, input);
+}
 
 	/* AppleScriptAvailable returns true if AppleScript is available
 	and the routines defined herein can be called. */
@@ -24,9 +51,10 @@ Boolean AppleScriptAvailable(void) {
 	/* LowRunAppleScript compiles and runs an AppleScript
 	provided as text in the buffer pointed to by text.  textLength
 	bytes will be compiled from this buffer and run as an AppleScript
-	using all of the default environment and execution settings.  If
-	resultData is not NULL, then the result returned by the execution
-	command will be returned as typeChar in this descriptor record
+	using all of the default environment and execution settings.  resultData
+        must be non-NULL, and should have been previously initialised, for example
+        with _hs_initNull. The result returned by the execution
+	command will be returned as typeUTF8Text in this descriptor record
 	(or typeNull if there is no result information).  If the function
 	returns errOSAScriptError, then resultData will be set to a
 	descriptive error message describing the error (if one is
@@ -56,16 +84,17 @@ OSStatus LowRunAppleScript(const void* text, long textLength, AEDesc *resultData
 	err = OSAExecute(theComponent, scriptID, kOSANullScript,
 					kOSAModeNull, &resultID);
 	if (resultData != NULL) {
-		AECreateDesc(typeNull, NULL, 0, resultData);
-		if (err == errOSAScriptError) {
-			OSAScriptError(theComponent, kOSAErrorMessage,
-						typeChar, resultData);
-		} else if (err == noErr && resultID != kOSANullScript) {
-			OSADisplay(theComponent, resultID, typeChar,
+		if (err == noErr && resultID != kOSANullScript) {
+			OSADisplay(theComponent, resultID, typeUTF8Text,
 						kOSAModeNull, resultData);
 		}
 	}
 bail:
+	if (err == errOSAScriptError) {
+          AECreateDesc(typeNull, NULL, 0, resultData);
+          OSAScriptError(theComponent, kOSAErrorMessage, typeUTF8Text, resultData);
+        }
+
 	AEDisposeDesc(&scriptTextDesc);
 	if (scriptID != kOSANullScript) OSADispose(theComponent,  scriptID);
 	if (resultID != kOSANullScript) OSADispose(theComponent,  resultID);

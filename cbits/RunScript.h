@@ -22,6 +22,12 @@
 extern "C" {
 #endif
 
+size_t _hs_AEDescSize(void);
+ptrdiff_t _hs_getUTF8Size(const AEDesc * input);
+OSErr _hs_getData(const AEDesc* input, void* dataPtr, size_t maxSize);
+OSErr _hs_dispose(AEDesc* input);
+void _hs_initNull(AEDesc * input);
+
 /* AppleScriptAvailable returns true if AppleScript is available. */
 Boolean AppleScriptAvailable(void);
 
