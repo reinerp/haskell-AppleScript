@@ -1,10 +1,8 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 import Foreign.AppleScript
-import Data.Text(pack)
 -- open a location in the default webbrowser
 
-main = do
-  execAppleScript (pack script)
+main = runScript [applescript| open location $value{location}$ |]
 
 location = "http://www.cs.nott.ac.uk/~wss"
-
-script = "open location " ++ show location

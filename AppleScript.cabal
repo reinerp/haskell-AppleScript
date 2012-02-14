@@ -20,8 +20,20 @@ if os(darwin) {
   Buildable:		True
   Build-Depends:        base >= 2 && < 5,
                         bytestring < 0.10,
-                        text < 0.12
-  Exposed-modules:	Foreign.AppleScript
+                        data-default < 0.4,
+                        text < 0.12,
+                        haskell-src-meta >= 0.5.0.3 && < 0.6,
+                        text-format < 0.4,
+                        network < 2.4,
+                        conduit < 0.3,
+                        directory < 1.2,
+                        template-haskell == 2.7.*,
+                        mtl == 2.0.*
+  Exposed-modules:
+                        Foreign.AppleScript
+                        Foreign.AppleScript.Error
+                        Foreign.AppleScript.Plain
+                        Foreign.AppleScript.Rich
   Frameworks: 		Carbon
   Extensions: 		CPP, ForeignFunctionInterface
   Include-Dirs:         cbits
