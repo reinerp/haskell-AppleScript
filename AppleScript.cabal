@@ -18,7 +18,7 @@ Extra-source-files:	examples/HelloThere.hs
                         , examples/SyntaxError.hs
 		        , cbits/RunScript.h
 Build-type:		Simple
-Cabal-Version:          >= 1.2 && < 2
+Cabal-Version:          >= 1.6
 
 source-repository head
   type:                 git
