@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 {-# LANGUAGE DeriveDataTypeable, OverloadedStrings #-}
 
+-- | Exceptions raised when running AppleScript code
 module Foreign.AppleScript.Error where
 
 import System.Exit

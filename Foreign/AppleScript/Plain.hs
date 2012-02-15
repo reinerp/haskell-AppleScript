@@ -80,6 +80,9 @@ foreign import ccall "RunScript.h LowRunAppleScript"
 -- available on your platform.
 foreign import ccall "RunScript.h AppleScriptAvailable" appleScriptAvailable :: IO Bool
 
+-- | Newtype representing AppleScript code. When possible, use the
+-- 'applescript' quasiquoter or the 'IsString' instance to generate
+-- values of this type.
 newtype AppleScript = AppleScript { unAppleScript :: Text }
   deriving(IsString)
 

@@ -44,7 +44,9 @@
 -- >   display dialog "Hello from the other greeter!"
 -- >  |]
 --
--- The quasiquoter is 
+-- The quasiquoter is based on a fairly simple string substitution scheme, and is not
+-- aware of AppleScript syntax. If syntax errors arise, use 'debugScript' to inspect
+-- the generated code.
 module Foreign.AppleScript.Rich
   (
   -- * Common-use functions
@@ -140,6 +142,11 @@ data AppleScriptElement
    -- >   PlainCode "..."
    -- >  ]
 
+-- | Types which can be inserted into AppleScript using the
+--
+-- > $value{ <haskell code> }$
+--
+-- syntax.
 class AppleScriptValue a where
   -- | Serialise the given Haskell value into AppleScript code.
   toAppleScriptCode :: a -> Plain.AppleScript
