@@ -6,9 +6,11 @@ Author:			Wouter Swierstra <wouter.swierstra@gmail.com>, Reiner Pope <reiner.pop
 Maintainer:		Reiner Pope <reiner.pope@gmail.com>
 homepage:               https://github.com/reinerp/haskell-AppleScript
 bug-reports:            https://github.com/reinerp/haskell-AppleScript/issues
-Synopsis:		Call AppleScript from Haskell.
-Description:		This package enables you to compile and 
-			execute AppleScript from Haskell applications.
+Synopsis:		Call AppleScript from Haskell, and then call back into Haskell.
+Description:
+  This package enables you to compile and execute AppleScript code from
+  Haskell, and provides support for this AppleScript code to call back
+  into Haskell.
 Category:		Foreign
 Extra-source-files:	examples/HelloThere.hs
 			, examples/OpenLocation.hs
