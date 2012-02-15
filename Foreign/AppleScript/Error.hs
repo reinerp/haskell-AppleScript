@@ -39,7 +39,7 @@ ignoreResultOrThrow mv = do
   v <- mv
   case v of
     (ExitSuccess, _) -> return ()
-    (ExitFailure c, mt) -> throw $ AppleScriptError c mt
+    (ExitFailure c, mt) -> throwIO $ AppleScriptError c mt
 
 -- | On success, extracts the message; otherwise throws 'AppleScriptError' or 'AppleScriptNoReturn', as appropriate.
 extractResultOrThrow :: IO (ExitCode, Maybe Text.Text) -> IO Text.Text
@@ -47,5 +47,5 @@ extractResultOrThrow mv = do
   v <- mv
   case v of
     (ExitSuccess, Just t) -> return t
-    (ExitSuccess, Nothing) -> throw AppleScriptNoReturn
-    (ExitFailure c, mt) -> throw $ AppleScriptError c mt
+    (ExitSuccess, Nothing) -> throwIO AppleScriptNoReturn
+    (ExitFailure c, mt) -> throwIO $ AppleScriptError c mt
