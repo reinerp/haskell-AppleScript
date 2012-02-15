@@ -4,6 +4,8 @@ License:		BSD3
 License-file:		LICENSE
 Author:			Wouter Swierstra <wouter.swierstra@gmail.com>, Reiner Pope <reiner.pope@gmail.com>
 Maintainer:		Reiner Pope <reiner.pope@gmail.com>
+homepage:               https://github.com/reinerp/haskell-AppleScript
+bug-reports:            https://github.com/reinerp/haskell-AppleScript/issues
 Synopsis:		Call AppleScript from Haskell.
 Description:		This package enables you to compile and 
 			execute AppleScript from Haskell applications.
@@ -17,6 +19,10 @@ Extra-source-files:	examples/HelloThere.hs
 		        , cbits/RunScript.h
 Build-type:		Simple
 Cabal-Version:          >= 1.2 && < 2
+
+source-repository head
+  type:                 git
+  location:             git://github.com/reinerp/haskell-AppleScript.git
 
 Library {
 if os(darwin) {
