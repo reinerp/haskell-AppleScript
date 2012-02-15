@@ -10,7 +10,10 @@ Description:		This package enables you to compile and
 Category:		Foreign
 Extra-source-files:	examples/HelloThere.hs
 			, examples/OpenLocation.hs
-			, examples/TextFields.hs
+                        , examples/Plain.hs
+                        , examples/Rich.hs
+                        , examples/RuntimeError.hs
+                        , examples/SyntaxError.hs
 		        , cbits/RunScript.h
 Build-type:		Simple
 Cabal-Version:          >= 1.2 && < 2
