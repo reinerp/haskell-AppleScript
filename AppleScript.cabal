@@ -2,8 +2,8 @@ Name:			AppleScript
 Version:		0.2
 License:		BSD3
 License-file:		LICENSE
-Author:			Wouter Swierstra
-Maintainer:		Wouter Swierstra <wouter@chalmers.se>
+Author:			Wouter Swierstra <wouter.swierstra@gmail.com>, Reiner Pope <reiner.pope@gmail.com>
+Maintainer:		Reiner Pope <reiner.pope@gmail.com>
 Synopsis:		Call AppleScript from Haskell.
 Description:		This package enables you to compile and 
 			execute AppleScript from Haskell applications.
