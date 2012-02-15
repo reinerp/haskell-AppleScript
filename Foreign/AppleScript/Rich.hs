@@ -233,6 +233,8 @@ runScriptFull conf script = runResourceT $ do
     talk :: (Text -> IO Text) -> Handle -> IO ()
     talk handler h = do
       hSetBuffering h LineBuffering
+      -- AppleScript's "do shell script" uses utf8; see https://developer.apple.com/library/mac/#technotes/tn2065/_index.html
+      hSetEncoding h utf8
       request <- Text.hGetLine h
       response <- handler request
       Text.hPutStrLn h (Text.append success_signal response)
