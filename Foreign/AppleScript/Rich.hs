@@ -228,12 +228,14 @@ runScriptFull conf script = runResourceT $ do
                 `finally` hClose h
             loop
 
+    success_signal = "success: "
+
     talk :: (Text -> IO Text) -> Handle -> IO ()
     talk handler h = do
       hSetBuffering h LineBuffering
       request <- Text.hGetLine h
       response <- handler request
-      Text.hPutStrLn h response
+      Text.hPutStrLn h (Text.append success_signal response)
     
     addSpecialFunctions :: CodeGenM ()
     addSpecialFunctions = tell_code $ 
@@ -243,7 +245,12 @@ runScriptFull conf script = runResourceT $ do
         "    if (count of (paragraphs of message)) > 1 then\n",
         "      error (\"callback was given more than one line of text: '\" & message & \"'\")\n",
         "    else\n",
-        "      return (do shell script \"echo \" & quoted form of message & \" | nc localhost \" & (quoted form of serverName))\n",
+        "      set resp to (do shell script \"echo \" & quoted form of message & \" | nc localhost \" & (quoted form of serverName))\n",
+        "      if resp starts with ", Text.pack (show success_signal), " then\n",
+        "        return ((characters ", Text.pack $ show $ 1 + Text.length success_signal, " thru (length of resp) of resp) as text)\n",
+        "      else\n",
+        "        error (\"callback didn't complete successfully. Response returned: '\" & resp & \"'\")\n",
+        "      end if\n",
         "    end if\n",
         "  end sendHaskellMessage\n",
         "end script\n"
