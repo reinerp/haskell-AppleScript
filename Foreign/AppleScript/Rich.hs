@@ -240,7 +240,11 @@ runScriptFull conf script = runResourceT $ do
       Text.concat [
         "script ", extsName conf, "\n",
         "  on sendHaskellMessage(serverName, message)\n",
-        "    return (do shell script \"echo \" & quoted form of message & \" | nc localhost \" & (quoted form of serverName))\n",
+        "    if (count of (paragraphs of message)) > 1 then\n",
+        "      error (\"callback was given more than one line of text: '\" & message & \"'\")\n",
+        "    else\n",
+        "      return (do shell script \"echo \" & quoted form of message & \" | nc localhost \" & (quoted form of serverName))\n",
+        "    end if\n",
         "  end sendHaskellMessage\n",
         "end script\n"
       ]
