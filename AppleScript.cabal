@@ -38,8 +38,9 @@ if os(darwin) {
                         network < 2.4,
                         conduit < 0.3,
                         directory < 1.2,
-                        template-haskell == 2.7.*,
-                        mtl == 2.0.*
+                        template-haskell >= 2.7,
+                        mtl >= 2.0,
+                        resourcet == 1.1.3
   Exposed-modules:
                         Foreign.AppleScript
                         Foreign.AppleScript.Error
