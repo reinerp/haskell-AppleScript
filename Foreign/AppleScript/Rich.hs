@@ -7,7 +7,7 @@
    TypeSynonymInstances, 
    FlexibleInstances 
  #-}
-{-# OPTIONS_GHC -funbox-strict-fields -Wall -Werror #-}
+{-# OPTIONS_GHC -funbox-strict-fields -Wall #-}
 
 -- |
 -- This module supports a \"rich\" communication with AppleScript. Specifically, this
@@ -72,7 +72,7 @@ import qualified Foreign.AppleScript.Plain as Plain
 import Control.Applicative
 import Control.Monad.State
 import Control.Monad.Writer
-import Control.Monad.Trans.Resource(ResourceT, runResourceT, withIO)
+import Control.Monad.Trans.Resource(ResourceT, runResourceT, allocate)
 
 import Control.Exception(tryJust, finally)
 import Control.Concurrent(forkIO, killThread)
@@ -276,11 +276,11 @@ runScriptFull conf script = runResourceT $ do
 
       -- start the callback server
       (_, sock) <- lift $
-        withIO
+        allocate
           (listenOn (PortNumber port))
           sClose
           -- (const $ return ())
-      void $ lift $ withIO
+      void $ lift $ allocate
         (forkIO $ serverLoop handler sock)
         killThread
 
