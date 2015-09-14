@@ -1,11 +1,11 @@
-{-# LANGUAGE 
-   TemplateHaskell, 
-   OverloadedStrings, 
-   ExistentialQuantification, 
-   ViewPatterns, 
-   TupleSections, 
-   TypeSynonymInstances, 
-   FlexibleInstances 
+{-# LANGUAGE
+   TemplateHaskell,
+   OverloadedStrings,
+   ExistentialQuantification,
+   ViewPatterns,
+   TupleSections,
+   TypeSynonymInstances,
+   FlexibleInstances
  #-}
 {-# OPTIONS_GHC -funbox-strict-fields -Wall -Werror #-}
 
@@ -27,14 +27,14 @@
 -- >   tell application "System Events"
 -- >     -- Haskell value splices, and Unicode support.
 -- >     display dialog "The value of π is $value{pi :: Double}$."
--- > 
+-- >
 -- >     -- AppleScript can call back into Haskell.
 -- >     set yourName to text returned of (display dialog "What is your name?" default answer "")
 -- >     display dialog ("Your name in reverse is " & $callback{ \t -> return (Text.reverse t) }$[ yourName ]$)
--- > 
+-- >
 -- >     -- Splice other AppleScript code into here
 -- >     $applescript{ othergreeter }$
--- > 
+-- >
 -- >     -- Return text from AppleScript back to Haskell
 -- >     return "Hello from AppleScript!"
 -- >   end tell
@@ -52,6 +52,7 @@ module Foreign.AppleScript.Rich
   -- * Common-use functions
   Plain.appleScriptAvailable,
   applescript,
+  applescriptplain,
   runScript,
   evalScript,
   debugScript,
@@ -63,16 +64,15 @@ module Foreign.AppleScript.Rich
   -- * Configuration
   AppleScriptConfig(..),
   def,
-  ) 
+  )
   where
 
 import           Foreign.AppleScript.Error
 import qualified Foreign.AppleScript.Plain as Plain
 
-import Control.Applicative
 import Control.Monad.State
 import Control.Monad.Writer
-import Control.Monad.Trans.Resource(ResourceT, runResourceT, withIO)
+import Control.Monad.Trans.Resource(ResourceT, runResourceT, allocate)
 
 import Control.Exception(tryJust, finally)
 import Control.Concurrent(forkIO, killThread)
@@ -275,12 +275,11 @@ runScriptFull conf script = runResourceT $ do
       port <- liftIO $ portGen conf
 
       -- start the callback server
-      (_, sock) <- lift $
-        withIO
+      (_, sock) <- lift $ allocate
           (listenOn (PortNumber port))
           sClose
           -- (const $ return ())
-      void $ lift $ withIO
+      void $ lift $ allocate
         (forkIO $ serverLoop handler sock)
         killThread
 
