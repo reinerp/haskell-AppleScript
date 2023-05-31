@@ -1,11 +1,11 @@
-{-# LANGUAGE 
-   TemplateHaskell, 
-   OverloadedStrings, 
-   ExistentialQuantification, 
-   ViewPatterns, 
-   TupleSections, 
-   TypeSynonymInstances, 
-   FlexibleInstances 
+{-# LANGUAGE
+   TemplateHaskell,
+   OverloadedStrings,
+   ExistentialQuantification,
+   ViewPatterns,
+   TupleSections,
+   TypeSynonymInstances,
+   FlexibleInstances
  #-}
 {-# OPTIONS_GHC -funbox-strict-fields -Wall -Werror #-}
 
@@ -27,14 +27,14 @@
 -- >   tell application "System Events"
 -- >     -- Haskell value splices, and Unicode support.
 -- >     display dialog "The value of π is $value{pi :: Double}$."
--- > 
+-- >
 -- >     -- AppleScript can call back into Haskell.
 -- >     set yourName to text returned of (display dialog "What is your name?" default answer "")
 -- >     display dialog ("Your name in reverse is " & $callback{ \t -> return (Text.reverse t) }$[ yourName ]$)
--- > 
+-- >
 -- >     -- Splice other AppleScript code into here
 -- >     $applescript{ othergreeter }$
--- > 
+-- >
 -- >     -- Return text from AppleScript back to Haskell
 -- >     return "Hello from AppleScript!"
 -- >   end tell
@@ -52,6 +52,7 @@ module Foreign.AppleScript.Rich
   -- * Common-use functions
   Plain.appleScriptAvailable,
   applescript,
+  applescriptplain,
   runScript,
   evalScript,
   debugScript,
@@ -63,16 +64,16 @@ module Foreign.AppleScript.Rich
   -- * Configuration
   AppleScriptConfig(..),
   def,
-  ) 
+  )
   where
 
 import           Foreign.AppleScript.Error
 import qualified Foreign.AppleScript.Plain as Plain
 
-import Control.Applicative
+import Control.Monad
 import Control.Monad.State
-import Control.Monad.Writer
-import Control.Monad.Trans.Resource(ResourceT, runResourceT, withIO)
+import Control.Monad.Writer hiding (listen)
+import Control.Monad.Trans.Resource(ResourceT, runResourceT, allocate)
 
 import Control.Exception(tryJust, finally)
 import Control.Concurrent(forkIO, killThread)
@@ -84,7 +85,7 @@ import GHC.IO.Exception(IOErrorType(InvalidArgument))
 
 import System.Exit
 
-import Network(accept, listenOn, sClose, PortID(..), PortNumber)
+import Network.Socket
 
 import Data.List(minimumBy)
 import Data.Ord(comparing)
@@ -153,9 +154,9 @@ class AppleScriptValue a where
 
 instance AppleScriptValue Int where toAppleScriptCode = Plain.AppleScript . Text.pack . show
 instance AppleScriptValue Double where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue String where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue Text where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue Strict.Text where toAppleScriptCode = Plain.AppleScript . Text.pack . show
+instance AppleScriptValue String where toAppleScriptCode = Plain.AppleScript . Text.pack
+instance AppleScriptValue Text where toAppleScriptCode = Plain.AppleScript
+instance AppleScriptValue Strict.Text where toAppleScriptCode = Plain.AppleScript . Text.fromStrict
 
 -- | Configuration for 'runScriptFull'. Use 'def' to get a default configuration.
 data AppleScriptConfig =
@@ -229,16 +230,18 @@ runScriptFull conf script = runResourceT $ do
         res <- tryJust (matchInvalidArgument . ioeGetErrorType) (accept sock)
         case res of
           Left () -> return () -- the socket was closed, which is normal operation
-          Right (h,hostName,_) -> do
-            void $ forkIO $
-              (when (hostName == "localhost") $ talk handler h)
-                `finally` hClose h
+          Right (sock',peerAddr) -> do
+            void $ forkIO $ do
+              myAddr <- getSocketName sock'
+              (when (myAddr == peerAddr) $ talk handler sock')
+                `finally` close sock
             loop
 
     success_signal = "success: "
 
-    talk :: (Text -> IO Text) -> Handle -> IO ()
-    talk handler h = do
+    talk :: (Text -> IO Text) -> Socket -> IO ()
+    talk handler sock = do
+      h <- socketToHandle sock ReadWriteMode
       hSetBuffering h LineBuffering
       -- AppleScript's "do shell script" uses utf8; see https://developer.apple.com/library/mac/#technotes/tn2065/_index.html
       hSetEncoding h utf8
@@ -273,14 +276,20 @@ runScriptFull conf script = runResourceT $ do
     proc_el (Callback handler arg_code) = do
       -- get the port
       port <- liftIO $ portGen conf
+      -- get addr including port
+      addr:_ <- liftIO $ getAddrInfo (Just defaultHints) Nothing (Just (show port))
 
       -- start the callback server
-      (_, sock) <- lift $
-        withIO
-          (listenOn (PortNumber port))
-          sClose
-          -- (const $ return ())
-      void $ lift $ withIO
+      (_, sock) <- lift $ allocate
+          (do
+            sock <- openSocket addr
+            bind sock (addrAddress addr)
+            listen sock 1
+            return sock
+          )
+          close
+
+      void $ lift $ allocate
         (forkIO $ serverLoop handler sock)
         killThread
 

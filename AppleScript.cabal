@@ -1,5 +1,5 @@
 Name:			AppleScript
-Version:		0.2.0.1
+Version:		0.2.0.2
 License:		BSD3
 License-file:		LICENSE
 Author:			Wouter Swierstra <wouter.swierstra@gmail.com>, Reiner Pope <reiner.pope@gmail.com>
@@ -30,16 +30,17 @@ Library {
 if os(darwin) {
   Buildable:		True
   Build-Depends:        base >= 2 && < 5,
-                        bytestring < 0.10,
-                        data-default < 0.4,
-                        text < 0.12,
-                        haskell-src-meta >= 0.5.0.3 && < 0.6,
-                        text-format < 0.4,
-                        network < 2.4,
-                        conduit < 0.3,
-                        directory < 1.2,
-                        template-haskell == 2.7.*,
-                        mtl == 2.0.*
+                        bytestring,
+                        data-default,
+                        text,
+                        haskell-src-meta >= 0.5.0.3,
+                        text-format,
+                        network,
+                        conduit,
+                        resourcet,
+                        directory,
+                        template-haskell >= 2.7.0.0,
+                        mtl
   Exposed-modules:
                         Foreign.AppleScript
                         Foreign.AppleScript.Error
