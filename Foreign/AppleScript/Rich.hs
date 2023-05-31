@@ -154,9 +154,9 @@ class AppleScriptValue a where
 
 instance AppleScriptValue Int where toAppleScriptCode = Plain.AppleScript . Text.pack . show
 instance AppleScriptValue Double where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue String where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue Text where toAppleScriptCode = Plain.AppleScript . Text.pack . show
-instance AppleScriptValue Strict.Text where toAppleScriptCode = Plain.AppleScript . Text.pack . show
+instance AppleScriptValue String where toAppleScriptCode = Plain.AppleScript . Text.pack
+instance AppleScriptValue Text where toAppleScriptCode = Plain.AppleScript
+instance AppleScriptValue Strict.Text where toAppleScriptCode = Plain.AppleScript . Text.fromStrict
 
 -- | Configuration for 'runScriptFull'. Use 'def' to get a default configuration.
 data AppleScriptConfig =
