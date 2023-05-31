@@ -70,8 +70,9 @@ module Foreign.AppleScript.Rich
 import           Foreign.AppleScript.Error
 import qualified Foreign.AppleScript.Plain as Plain
 
+import Control.Monad
 import Control.Monad.State
-import Control.Monad.Writer
+import Control.Monad.Writer hiding (listen)
 import Control.Monad.Trans.Resource(ResourceT, runResourceT, allocate)
 
 import Control.Exception(tryJust, finally)
@@ -84,7 +85,7 @@ import GHC.IO.Exception(IOErrorType(InvalidArgument))
 
 import System.Exit
 
-import Network(accept, listenOn, sClose, PortID(..), PortNumber)
+import Network.Socket
 
 import Data.List(minimumBy)
 import Data.Ord(comparing)
@@ -229,16 +230,18 @@ runScriptFull conf script = runResourceT $ do
         res <- tryJust (matchInvalidArgument . ioeGetErrorType) (accept sock)
         case res of
           Left () -> return () -- the socket was closed, which is normal operation
-          Right (h,hostName,_) -> do
-            void $ forkIO $
-              (when (hostName == "localhost") $ talk handler h)
-                `finally` hClose h
+          Right (sock',peerAddr) -> do
+            void $ forkIO $ do
+              myAddr <- getSocketName sock'
+              (when (myAddr == peerAddr) $ talk handler sock')
+                `finally` close sock
             loop
 
     success_signal = "success: "
 
-    talk :: (Text -> IO Text) -> Handle -> IO ()
-    talk handler h = do
+    talk :: (Text -> IO Text) -> Socket -> IO ()
+    talk handler sock = do
+      h <- socketToHandle sock ReadWriteMode
       hSetBuffering h LineBuffering
       -- AppleScript's "do shell script" uses utf8; see https://developer.apple.com/library/mac/#technotes/tn2065/_index.html
       hSetEncoding h utf8
@@ -273,12 +276,19 @@ runScriptFull conf script = runResourceT $ do
     proc_el (Callback handler arg_code) = do
       -- get the port
       port <- liftIO $ portGen conf
+      -- get addr including port
+      addr:_ <- liftIO $ getAddrInfo (Just defaultHints) Nothing (Just (show port))
 
       -- start the callback server
       (_, sock) <- lift $ allocate
-          (listenOn (PortNumber port))
-          sClose
-          -- (const $ return ())
+          (do
+            sock <- openSocket addr
+            bind sock (addrAddress addr)
+            listen sock 1
+            return sock
+          )
+          close
+
       void $ lift $ allocate
         (forkIO $ serverLoop handler sock)
         killThread
